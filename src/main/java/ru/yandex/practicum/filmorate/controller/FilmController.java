@@ -54,7 +54,7 @@ public class FilmController {
     }
 
     private void throwError (final String msg) throws ValidationException {
-        ValidationException e = new ValidationException(msg );
+        ValidationException e = new ValidationException(msg);
         log.warn(e.getMessage());
         throw e;
     }

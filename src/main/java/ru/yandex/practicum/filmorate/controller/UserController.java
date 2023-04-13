@@ -53,8 +53,8 @@ public class UserController {
         return user;
     }
 
-    private void throwError (final String msg) throws ValidationException {
-        ValidationException e = new ValidationException(msg );
+    private void throwError(final String msg) throws ValidationException {
+        ValidationException e = new ValidationException(msg);
         log.warn(e.getMessage());
         throw e;
     }

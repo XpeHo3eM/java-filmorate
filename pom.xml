@@ -39,9 +39,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate.validator</groupId>
+			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>8.0.0.Final</version>
+			<version>6.2.5.Final</version>
 		</dependency>
 	</dependencies>
 

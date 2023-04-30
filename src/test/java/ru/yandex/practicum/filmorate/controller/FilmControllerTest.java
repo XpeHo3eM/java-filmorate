@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -20,8 +22,8 @@ public class FilmControllerTest {
     private FilmController controller;
 
     @BeforeEach
-    public void createCorrectFilm() {
-        controller = new FilmController();
+    public void createCorrectFilm(FilmController controller) {
+        this.controller = controller;
 
         film = Film.builder()
                 .name("Scary movie")

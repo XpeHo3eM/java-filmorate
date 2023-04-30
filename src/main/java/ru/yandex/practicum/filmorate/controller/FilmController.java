@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -13,26 +14,23 @@ import java.util.*;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private static int               id    = 0;
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmService service;
+
+    @Autowired
+    public FilmController(FilmService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        return service.getAllFilms();
     }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug(film.toString());
 
-        FilmValidator.validate(film);
-
-        if (films.containsValue(film)) {
-            throwError("Текущий фильм уже добавлен: " + film);
-        }
-
-        film.setId(++id);
-        films.put(id, film);
+        service.addFilm(film);
 
         return film;
     }
@@ -41,21 +39,30 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.debug(film.toString());
 
-        FilmValidator.validate(film);
-
-        int id = film.getId();
-        if (!films.containsKey(id)) {
-            throwError("Отсутствует фильм с таким ID: " + film.getId());
-        }
-
-        films.put(id, film);
+        service.updateFilm(film);
 
         return film;
     }
 
-    private void throwError(final String msg) throws ValidationException {
-        ValidationException e = new ValidationException(msg);
-        log.warn(e.getMessage());
-        throw e;
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable long id) {
+        return service.getFilmById(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
+        service.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeLike(@PathVariable long id, @PathVariable long userId) {
+        service.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopulated(@RequestParam(required = false) Integer count) {
+        return service.getPopulated(count);
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -21,8 +22,9 @@ public class UserControllerTest {
     private UserController controller;
 
     @BeforeEach
-    public void createCorrectUser() {
-        controller = new UserController();
+    @Autowired
+    public void createCorrectUser(UserController controller) {
+        this.controller = controller;
 
         user = User.builder()
                 .name("Pavel")

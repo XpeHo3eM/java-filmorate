@@ -8,12 +8,13 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 public class User {
     @EqualsAndHashCode.Exclude
-    private int       id;
+    private long       id;
 
     private String    name;
 
@@ -25,4 +26,6 @@ public class User {
 
     @PastOrPresent(message = "birthday can't be after today")
     private LocalDate birthday;
+
+    private Set<Long> friends;
 }

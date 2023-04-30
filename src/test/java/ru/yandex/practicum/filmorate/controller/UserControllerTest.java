@@ -95,11 +95,11 @@ public class UserControllerTest {
 
         assertThrows(ValidationException.class,
                 () -> controller.updateUser(User.builder()
-                                                .name("Serj")
-                                                .login("XpeHo3eM")
-                                                .email("XpeHo3eM@gmail.com")
-                                                .birthday(LocalDate.of(1990, Month.MARCH, 13))
-                                                .build()),
+                        .name("Serj")
+                        .login("XpeHo3eM")
+                        .email("XpeHo3eM@gmail.com")
+                        .birthday(LocalDate.of(1990, Month.MARCH, 13))
+                        .build()),
                 "Обновился пользователь без ID");
     }
 }

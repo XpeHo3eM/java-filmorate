@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.validator.FilmValidator;
 import java.util.*;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     private static long              id = 0;
     private final Map<Long, Film> films = new HashMap<>();
 

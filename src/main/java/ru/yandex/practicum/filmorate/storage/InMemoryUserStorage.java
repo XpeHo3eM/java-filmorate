@@ -9,7 +9,7 @@ import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private static int            id    = 0;
+    private static int               id = 0;
     private final Map<Long, User> users = new HashMap<>();
 
     @Override

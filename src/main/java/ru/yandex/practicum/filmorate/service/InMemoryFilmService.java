@@ -56,12 +56,15 @@ public class InMemoryFilmService implements FilmService {
     @Override
     public List<Film> getPopulated(Integer filmsCount) {
         final long       DEFAULT_FILMS_COUNT = 10;
-        long             max_films           = filmsCount != null ? filmsCount : DEFAULT_FILMS_COUNT;
+        long             maxFilms            = filmsCount != null ? filmsCount : DEFAULT_FILMS_COUNT;
         final List<Film> films               = filmStorage.getAllFilms();
 
         return films.stream()
-                .sorted((f1, f2) -> { return f2.getUsersLikes().size() - f1.getUsersLikes().size(); })
-                .limit(max_films)
+                .sorted((f1, f2) ->
+                {
+                    return f2.getUsersLikes().size() - f1.getUsersLikes().size();
+                })
+                .limit(maxFilms)
                 .collect(Collectors.toList());
     }
 

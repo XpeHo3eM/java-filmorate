@@ -60,10 +60,7 @@ public class InMemoryFilmService implements FilmService {
         final List<Film> films               = filmStorage.getAllFilms();
 
         return films.stream()
-                .sorted((f1, f2) ->
-                {
-                    return f2.getUsersLikes().size() - f1.getUsersLikes().size();
-                })
+                .sorted((f1, f2) -> { return f2.getUsersLikes().size() - f1.getUsersLikes().size(); })
                 .limit(maxFilms)
                 .collect(Collectors.toList());
     }

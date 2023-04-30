@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FilmService {
     public void addLike(long filmId, long userId);

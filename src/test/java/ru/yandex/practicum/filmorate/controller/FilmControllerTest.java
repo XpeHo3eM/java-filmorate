@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,12 +18,12 @@ public class FilmControllerTest {
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final LocalDate MIN_RELEASE_DATE_TIME = LocalDate.of(1895, Month.DECEMBER, 28);
     private Film film;
+
+    @Autowired
     private FilmController controller;
 
     @BeforeEach
-    public void createCorrectFilm(FilmController controller) {
-        this.controller = controller;
-
+    public void createCorrectFilm() {
         film = Film.builder()
                 .name("Scary movie")
                 .description("Comedy")
@@ -37,7 +38,7 @@ public class FilmControllerTest {
 
         List<Film> films = controller.getAllFilms();
 
-        assertEquals(film, films.get(0), "Не найден корректный фильм");
+        assertTrue(films.contains(film), "Не найден корректный фильм");
     }
 
     @Test

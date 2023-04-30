@@ -14,7 +14,7 @@ import java.util.Set;
 @Builder
 public class User {
     @EqualsAndHashCode.Exclude
-    private long       id;
+    private Long       id;
 
     private String    name;
 

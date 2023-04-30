@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
@@ -9,7 +10,7 @@ import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private static int               id = 0;
+    private static long              id = 0;
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
@@ -38,7 +39,11 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         UserValidator.validate(user);
 
-        long id = user.getId();
+        Long id = user.getId();
+
+        if (id == null) {
+            throw new ValidationException("Отсутствует ID пользователя для поиска");
+        }
 
         if (!users.containsKey(id)) {
             throw new ObjectNotFoundException(String.format("Пользователь с id = %s не найден", id));

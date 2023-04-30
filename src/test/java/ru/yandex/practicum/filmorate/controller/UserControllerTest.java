@@ -19,13 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class UserControllerTest {
     private User user;
+    @Autowired
     private UserController controller;
 
     @BeforeEach
-    @Autowired
-    public void createCorrectUser(UserController controller) {
-        this.controller = controller;
 
+    public void createCorrectUser() {
         user = User.builder()
                 .name("Pavel")
                 .login("XpeHo3eM")
@@ -40,7 +39,7 @@ public class UserControllerTest {
 
         List<User> users = controller.getAllUsers();
 
-        assertEquals(user, users.get(0), "Не найден корректный пользователь");
+        assertTrue(users.contains(user), "Не найден корректный пользователь");
     }
 
     @Test

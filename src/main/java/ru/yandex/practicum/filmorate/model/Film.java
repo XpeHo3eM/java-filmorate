@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 public class Film {
     @EqualsAndHashCode.Exclude
-    private long id;
+    private Long id;
 
     @NotBlank(message = "name can't be blank")
     private String name;

@@ -11,7 +11,7 @@ import java.util.*;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private static long              id = 0;
+    private static long id = 0;
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
@@ -28,7 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film addFilm(Film film) {
         FilmValidator.validate(film);
 
-        if (films.containsValue(film)) {
+        if (films.containsKey(film.getId())) {
             throw new FilmAlreadyExistsException(String.format("Текущий фильм уже добавлен: %s", film));
         }
 

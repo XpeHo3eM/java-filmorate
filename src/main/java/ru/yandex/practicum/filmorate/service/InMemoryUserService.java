@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class InMemoryUserService implements UserService {
@@ -24,10 +25,10 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void addFriend(long user1Id, long user2Id) {
-        User      user1    = getUserOrThrowException(user1Id);
-        User      user2    = getUserOrThrowException(user2Id);
-        Set<Long> friends1 = user1.getFriends();
-        Set<Long> friends2 = user2.getFriends();
+        User user1 = getUserOrThrowException(user1Id);
+        User user2 = getUserOrThrowException(user2Id);
+        Set<Long> friends1 = user1.getFriendsIds();
+        Set<Long> friends2 = user2.getFriendsIds();
 
         if (friends1.contains(user2Id)) {
             throw new UserAlreadyOnFriendsException(String.format("%s и $s уже друзья.", user1.getName(), user2.getName()));
@@ -39,10 +40,10 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void removeFriend(long user1Id, long user2Id) {
-        User      user1    = getUserOrThrowException(user1Id);
-        User      user2    = getUserOrThrowException(user2Id);
-        Set<Long> friends1 = user1.getFriends();
-        Set<Long> friends2 = user2.getFriends();
+        User user1 = getUserOrThrowException(user1Id);
+        User user2 = getUserOrThrowException(user2Id);
+        Set<Long> friends1 = user1.getFriendsIds();
+        Set<Long> friends2 = user2.getFriendsIds();
 
         if (!friends1.contains(user2Id)) {
             throw new UserNotOnFriendsException(String.format("%s и $s не друзья.", user1.getName(), user2.getName()));
@@ -54,15 +55,15 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public Set<User> getMutualFriends(long user1Id, long user2Id) {
-        User      user1        = getUserOrThrowException(user1Id);
-        User      user2        = getUserOrThrowException(user2Id);
-        Set<Long> intersection = new HashSet<>(user1.getFriends());
+        User user1 = getUserOrThrowException(user1Id);
+        User user2 = getUserOrThrowException(user2Id);
+        Set<Long> intersection = new HashSet<>(user1.getFriendsIds());
 
-        intersection.retainAll(user2.getFriends());
+        intersection.retainAll(user2.getFriendsIds());
 
-        Set<User> friendsIntersection = new HashSet<>();
-
-        intersection.forEach(id -> friendsIntersection.add(storage.getUserById(id)));
+        Set<User> friendsIntersection = intersection.stream()
+                .map(storage::getUserById)
+                .collect(Collectors.toSet());
 
         return friendsIntersection;
     }
@@ -89,8 +90,8 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public List<User> getFriends(long id) {
-        Set<Long> friendsIds = storage.getUserById(id).getFriends();
-        List<User> friends    = new ArrayList<>();
+        Set<Long> friendsIds = storage.getUserById(id).getFriendsIds();
+        List<User> friends = new ArrayList<>();
 
         friendsIds.forEach(userId -> friends.add(storage.getUserById(userId)));
 

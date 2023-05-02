@@ -29,10 +29,10 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({UserAlreadyOnFriendsException.class,
-                       UserNotOnFriendsException.class,
-                       FilmAlreadyLikedException.class,
-                       FilmNotLikedException.class,
-                       FilmAlreadyExistsException.class})
+            UserNotOnFriendsException.class,
+            FilmAlreadyLikedException.class,
+            FilmNotLikedException.class,
+            FilmAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> runtimeExceptions(final RuntimeException e) {
         return Map.of("Error", e.getMessage());

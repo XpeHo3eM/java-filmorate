@@ -14,18 +14,18 @@ import java.util.Set;
 @Builder
 public class User {
     @EqualsAndHashCode.Exclude
-    private Long       id;
+    private Long id;
 
-    private String    name;
+    private String name;
 
     @Email(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "email is not valid")
-    private String    email;
+    private String email;
 
     @NotBlank(message = "login can't be blank")
-    private String    login;
+    private String login;
 
     @PastOrPresent(message = "birthday can't be after today")
     private LocalDate birthday;
 
-    private Set<Long> friends;
+    private Set<Long> friendsIds;
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,21 +17,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class InMemoryFilmService implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    @Autowired
-    public InMemoryFilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
-
     @Override
     public void addLike(long filmId, long userId) {
-        User      user  = getUserOrThrowException(userId);
-        Film      film  = getFilmOrThrowException(filmId);
+        User user = getUserOrThrowException(userId);
+        Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 
         if (likes.contains(userId)) {
@@ -42,8 +37,8 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public void removeLike(long filmId, long userId) {
-        User      user  = getUserOrThrowException(userId);
-        Film      film  = getFilmOrThrowException(filmId);
+        User user = getUserOrThrowException(userId);
+        Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 
         if (!likes.contains(userId)) {
@@ -55,13 +50,14 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public List<Film> getPopulated(Integer filmsCount) {
-        final long       DEFAULT_FILMS_COUNT = 10;
-        long             maxFilms            = filmsCount != null ? filmsCount : DEFAULT_FILMS_COUNT;
-        final List<Film> films               = filmStorage.getAllFilms();
+        final long DEFAULT_FILMS_COUNT = 10;
+        long maxFilms = filmsCount != null ? filmsCount : DEFAULT_FILMS_COUNT;
+        final List<Film> films = filmStorage.getAllFilms();
 
         return films.stream()
                 .sorted((f1, f2) -> {
-                    return f2.getUsersLikes().size() - f1.getUsersLikes().size(); })
+                    return f2.getUsersLikes().size() - f1.getUsersLikes().size();
+                })
                 .limit(maxFilms)
                 .collect(Collectors.toList());
     }

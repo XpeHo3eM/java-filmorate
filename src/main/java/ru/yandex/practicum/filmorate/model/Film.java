@@ -9,12 +9,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 public class Film {
     @EqualsAndHashCode.Exclude
-    private int id;
+    private Long id;
 
     @NotBlank(message = "name can't be blank")
     private String name;
@@ -27,4 +28,6 @@ public class Film {
 
     @Positive
     private int duration;
+
+    private Set<Long> usersLikes;
 }

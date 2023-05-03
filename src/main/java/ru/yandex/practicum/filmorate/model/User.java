@@ -8,21 +8,24 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 public class User {
     @EqualsAndHashCode.Exclude
-    private int       id;
+    private Long id;
 
-    private String    name;
+    private String name;
 
     @Email(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "email is not valid")
-    private String    email;
+    private String email;
 
     @NotBlank(message = "login can't be blank")
-    private String    login;
+    private String login;
 
     @PastOrPresent(message = "birthday can't be after today")
     private LocalDate birthday;
+
+    private Set<Long> friendsIds;
 }

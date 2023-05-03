@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -18,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class UserControllerTest {
     private User user;
+    @Autowired
     private UserController controller;
 
     @BeforeEach
-    public void createCorrectUser() {
-        controller = new UserController();
 
+    public void createCorrectUser() {
         user = User.builder()
                 .name("Pavel")
                 .login("XpeHo3eM")
@@ -38,7 +39,7 @@ public class UserControllerTest {
 
         List<User> users = controller.getAllUsers();
 
-        assertEquals(user, users.get(0), "Не найден корректный пользователь");
+        assertTrue(users.contains(user), "Не найден корректный пользователь");
     }
 
     @Test
@@ -93,11 +94,11 @@ public class UserControllerTest {
 
         assertThrows(ValidationException.class,
                 () -> controller.updateUser(User.builder()
-                                                .name("Serj")
-                                                .login("XpeHo3eM")
-                                                .email("XpeHo3eM@gmail.com")
-                                                .birthday(LocalDate.of(1990, Month.MARCH, 13))
-                                                .build()),
+                        .name("Serj")
+                        .login("XpeHo3eM")
+                        .email("XpeHo3eM@gmail.com")
+                        .birthday(LocalDate.of(1990, Month.MARCH, 13))
+                        .build()),
                 "Обновился пользователь без ID");
     }
 }

@@ -27,7 +27,7 @@ public class UserValidator {
         LocalDate now = LocalDate.now();
         if (now.isBefore(user.getBirthday())) {
             throw new ValidationException("Дата рождения не может быть позже текущей даты: "
-                                            + "\nсейчас " + now + "\nдень рождения: " + user.getBirthday());
+                    + "\nсейчас " + now + "\nдень рождения: " + user.getBirthday());
         }
     }
 }

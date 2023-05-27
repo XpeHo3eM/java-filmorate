@@ -1,24 +1,19 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.InMemoryUserService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
-    private final InMemoryUserService service;
+    private final UserService service;
 
-    @Autowired
-    public UserController(InMemoryUserService service) {
+    public UserController(UserService service) {
         this.service = service;
     }
 
@@ -60,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getMutualFriends(@PathVariable long id, @PathVariable long otherId) {
+    public List<User> getMutualFriends(@PathVariable long id, @PathVariable long otherId) {
         return service.getMutualFriends(id, otherId);
     }
 }

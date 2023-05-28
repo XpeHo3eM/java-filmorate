@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.Mapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository("userDao")
 public class UserDao implements UserStorage {
@@ -22,33 +21,33 @@ public class UserDao implements UserStorage {
 
     @Override
     @Transactional
-    public Optional<User> getUserById(long id) {
+    public User getUserById(long id) {
         String sqlQuery = "SELECT *\n" +
                 "FROM users\n" +
                 "WHERE id = ?;";
 
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToUser, id));
+            return jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToUser, id);
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
     }
 
     @Override
     @Transactional
-    public Optional<List<User>> getAllUsers() {
+    public List<User> getAllUsers() {
         String sqlQuery = "SELECT *\n" +
                 "FROM users\n" +
                 "ORDER BY id;";
 
         List<User> users = jdbcTemplate.query(sqlQuery, Mapper::mapRowToUser);
 
-        return Optional.of(users);
+        return users;
     }
 
     @Override
     @Transactional
-    public Optional<User> addUser(User user) {
+    public User addUser(User user) {
         Long userId = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id")
@@ -59,7 +58,7 @@ public class UserDao implements UserStorage {
 
     @Override
     @Transactional
-    public Optional<User> updateUser(User user) {
+    public User updateUser(User user) {
         String sqlQuery = "UPDATE users\n" +
                 "SET name = ?,\n" +
                 "\tlogin = ?,\n" +
@@ -75,7 +74,7 @@ public class UserDao implements UserStorage {
                     user.getBirthday(),
                     user.getId());
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
 
         return getUserById(user.getId());
@@ -83,7 +82,7 @@ public class UserDao implements UserStorage {
 
     @Override
     @Transactional
-    public Optional<List<User>> getFriends(Long id) {
+    public List<User> getFriends(Long id) {
         String sqlQuery = "SELECT u.id AS id,\n" +
                 "\tu.name AS name,\n" +
                 "\tu.login AS login,\n" +
@@ -93,12 +92,12 @@ public class UserDao implements UserStorage {
                 "JOIN user_friends AS uf ON u.id = uf.friend_id\n" +
                 "WHERE uf.user_id = ?;";
 
-        return Optional.of(jdbcTemplate.query(sqlQuery, Mapper::mapRowToUser, id));
+        return jdbcTemplate.query(sqlQuery, Mapper::mapRowToUser, id);
     }
 
     @Override
     @Transactional
-    public Optional<List<User>> addFriend(Long fromId, Long toId) {
+    public List<User> addFriend(Long fromId, Long toId) {
         String sqlQuery = "INSERT INTO user_friends (user_id, friend_id)\n" +
                 "VALUES (?, ?);";
 
@@ -109,7 +108,7 @@ public class UserDao implements UserStorage {
 
     @Override
     @Transactional
-    public Optional<List<User>> removeFriend(Long fromId, Long toId) {
+    public List<User> removeFriend(Long fromId, Long toId) {
         String sqlQuery = "DELETE FROM user_friends\n" +
                 "WHERE (user_id = ? AND friend_id = ?)\n" +
                 "\tOR (user_id = ? AND friend_id = ?);";

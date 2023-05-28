@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.mpa.MpaEntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.RatingMpaService;
 import ru.yandex.practicum.filmorate.storage.RatingMpaStorage;
@@ -19,13 +19,17 @@ public class RatingMPAServiceImpl implements RatingMpaService {
 
     @Override
     public List<Mpa> getRatingMPAs() {
-        return ratingMpaStorage.getRatingMPAs().orElse(new ArrayList<>());
+        return ratingMpaStorage.getRatingMPAs();
     }
 
     @Override
     public Mpa getRatingMPA(Integer id) {
-        return ratingMpaStorage.getRatingMPA(id).orElseThrow(() ->
-                new ObjectNotFoundException(String.format("Рейтинг с ID = %s не найден", id))
-        );
+        Mpa mpaOnDb = ratingMpaStorage.getRatingMPA(id);
+
+        if (mpaOnDb == null) {
+            throw new MpaEntityNotFoundException(String.format("Рейтинг с ID = %s не найден", id));
+        }
+
+        return mpaOnDb;
     }
 }

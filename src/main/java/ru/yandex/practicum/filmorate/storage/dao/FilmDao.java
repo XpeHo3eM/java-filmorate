@@ -27,7 +27,7 @@ public class FilmDao implements FilmStorage {
 
     @Override
     @Transactional
-    public Optional<Film> getFilmById(long id) {
+    public Film getFilmById(long id) {
         String sqlQuery = "SELECT f.id,\n" +
                 "\tf.name,\n" +
                 "\tf.description,\n" +
@@ -43,18 +43,18 @@ public class FilmDao implements FilmStorage {
         try {
             film = jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToFilm, id);
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
 
         film.setGenres(getGenres(id));
         film.setUsersLikes(getLikes(id));
 
-        return Optional.of(film);
+        return film;
     }
 
     @Override
     @Transactional
-    public Optional<List<Film>> getAllFilms() {
+    public List<Film> getAllFilms() {
         String sqlQuery = "SELECT f.id,\n" +
                 "\tf.name,\n" +
                 "\tf.description,\n" +
@@ -80,12 +80,12 @@ public class FilmDao implements FilmStorage {
                     .add(Long.parseLong(row.get("user_id").toString()));
         });
 
-        return Optional.of(films);
+        return films;
     }
 
     @Override
     @Transactional
-    public Optional<Film> addFilm(Film film) {
+    public Film addFilm(Film film) {
         Long filmId = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("id")
@@ -102,15 +102,15 @@ public class FilmDao implements FilmStorage {
 
     @Override
     @Transactional
-    public Optional<Film> updateFilm(Film film) {
-        if (getFilmById(film.getId()).isEmpty()) {
-            return Optional.empty();
+    public Film updateFilm(Film film) {
+        if (getFilmById(film.getId()) == null) {
+            return null;
         }
 
         try {
             updateFilmsTable(film);
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
 
         updateFilmGenres(film);

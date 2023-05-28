@@ -68,41 +68,40 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldReturn6Genre() {
-        assertEquals(6, genreStorage.getGenres().orElse(new ArrayList<>()).size(),
-                "Некорректно количество жанров");
+        assertEquals(6, genreStorage.getGenres().size(), "Некорректно количество жанров");
     }
 
     @Test
     void shouldGetCorrectGenre() {
-        assertEquals(Genre.COMEDY, genreStorage.getGenre(Genre.COMEDY.getId()).orElse(null),
+        assertEquals(Genre.COMEDY, genreStorage.getGenre(Genre.COMEDY.getId()),
                 "Некорректно извлекается жанр фильма");
-        assertEquals(Genre.CARTOON, genreStorage.getGenre(Genre.CARTOON.getId()).orElse(null),
+        assertEquals(Genre.CARTOON, genreStorage.getGenre(Genre.CARTOON.getId()),
                 "Некорректно извлекается жанр фильма");
-        assertEquals(Genre.ACTION_MOVIE, genreStorage.getGenre(Genre.ACTION_MOVIE.getId()).orElse(null),
+        assertEquals(Genre.ACTION_MOVIE, genreStorage.getGenre(Genre.ACTION_MOVIE.getId()),
                 "Некорректно извлекается жанр фильма");
     }
 
     @Test
     void shouldReturn5RatingMPAs() {
-        assertEquals(5, ratingMpaStorage.getRatingMPAs().orElse(new ArrayList<>()).size(),
+        assertEquals(5, ratingMpaStorage.getRatingMPAs().size(),
                 "Некорректное количество вариаций рейтинга");
     }
 
     @Test
     void shouldGetCorrectRagingMPA() {
-        assertEquals(Mpa.G, ratingMpaStorage.getRatingMPA(Mpa.G.getId()).orElse(null),
+        assertEquals(Mpa.G, ratingMpaStorage.getRatingMPA(Mpa.G.getId()),
                 "Некорректно извлекается рейтинг фильма");
-        assertEquals(Mpa.PG13, ratingMpaStorage.getRatingMPA(Mpa.PG13.getId()).orElse(null),
+        assertEquals(Mpa.PG13, ratingMpaStorage.getRatingMPA(Mpa.PG13.getId()),
                 "Некорректно извлекается рейтинг фильма");
-        assertEquals(Mpa.NC17, ratingMpaStorage.getRatingMPA(Mpa.NC17.getId()).orElse(null),
+        assertEquals(Mpa.NC17, ratingMpaStorage.getRatingMPA(Mpa.NC17.getId()),
                 "Некорректно извлекается рейтинг фильма");
     }
 
     @Test
     void shouldReturnFilm() {
-        assertTrue(filmStorage.addFilm(film1).isPresent(),
+        assertNotNull(filmStorage.addFilm(film1),
                 "Не вернулся фильм при добавлении");
-        assertEquals(film1, filmStorage.getAllFilms().get().get(0),
+        assertEquals(film1, filmStorage.getAllFilms().get(0),
                 "Не вернулся фильм после запроса");
     }
 
@@ -111,7 +110,7 @@ class FilmorateApplicationTests {
         filmStorage.addFilm(film1);
         filmStorage.addFilm(film2);
 
-        List<Film> films = filmStorage.getAllFilms().orElse(new ArrayList<>());
+        List<Film> films = filmStorage.getAllFilms();
 
         assertTrue(films.size() > 1,
                 "Количество фильмов меньше 2");
@@ -123,22 +122,22 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldUpdateFilm() {
-        film1 = filmStorage.addFilm(film1).get();
+        film1 = filmStorage.addFilm(film1);
         film1.setName("UpdatedFilm1");
         filmStorage.updateFilm(film1);
 
-        assertEquals(1, filmStorage.getAllFilms().get().size(),
+        assertEquals(1, filmStorage.getAllFilms().size(),
                 "Количество фильмов не равно 1");
 
-        assertEquals(film1, filmStorage.getAllFilms().get().get(0),
+        assertEquals(film1, filmStorage.getAllFilms().get(0),
                 "Не обнаружен обновленный фильм");
     }
 
     @Test
     void shouldReturnUser() {
-        assertTrue(userStorage.addUser(user1).isPresent(),
+        assertNotNull(userStorage.addUser(user1),
                 "Не вернулся пользователь при добавлении");
-        assertEquals(user1, userStorage.getAllUsers().get().get(0),
+        assertEquals(user1, userStorage.getAllUsers().get(0),
                 "Не вернулся пользователь после запроса");
     }
 
@@ -147,25 +146,27 @@ class FilmorateApplicationTests {
         userStorage.addUser(user1);
         userStorage.addUser(user2);
 
-        List<User> users = userStorage.getAllUsers().orElse(new ArrayList<>());
+        List<User> users = userStorage.getAllUsers();
 
+        assertNotNull(users,
+                "Не вернулись пользователи");
         assertTrue(users.size() > 1,
                 "Количество пользователей меньше 2");
-        assertEquals(user1, userStorage.getAllUsers().get().get(0),
+        assertEquals(user1, userStorage.getAllUsers().get(0),
                 "Не совпадает пользователь после добавления");
-        assertEquals(user2, userStorage.getAllUsers().get().get(1),
+        assertEquals(user2, userStorage.getAllUsers().get(1),
                 "Не совпадает второй пользователь после добавления");
     }
 
     @Test
     void shouldUpdateUser() {
-        user1 = userStorage.addUser(user1).get();
+        user1 = userStorage.addUser(user1);
         user1.setName("UpdatedUser1");
         userStorage.updateUser(user1);
 
-        assertEquals(1, userStorage.getAllUsers().get().size(),
+        assertEquals(1, userStorage.getAllUsers().size(),
                 "Количество пользователей не равно 1");
-        assertEquals(user1, userStorage.getAllUsers().get().get(0),
+        assertEquals(user1, userStorage.getAllUsers().get(0),
                 "Не обнаружен обновленный пользователь");
     }
 
@@ -174,16 +175,23 @@ class FilmorateApplicationTests {
         userStorage.addUser(user1);
         userStorage.addUser(user2);
 
-        assertTrue(userStorage.addFriend(1L, 2L).isPresent());
+        assertNotNull(userStorage.addFriend(1L, 2L),
+                "Не добавился друг");
 
-        Optional<List<User>> users = userStorage.getAllUsers();
+        List<User> users = userStorage.getAllUsers();
 
-        assertTrue(users.isPresent());
-        assertTrue(users.get().size() > 0);
-        assertTrue(userStorage.getFriends(1L).isPresent());
-        assertFalse(userStorage.getFriends(1L).get().isEmpty());
-        assertTrue(userStorage.getFriends(2L).isPresent());
-        assertTrue(userStorage.getFriends(2L).get().isEmpty());
+        assertNotNull(users,
+                "Не вернулись пользователи");
+        assertTrue(users.size() > 1,
+                "Вернулось пользователей меньше 2");
+        assertNotNull(userStorage.getFriends(1L),
+                "Вернулся список друзей первого пользователя null");
+        assertFalse(userStorage.getFriends(1L).isEmpty(),
+                "Список друзей первого пользователя пуст");
+        assertNotNull(userStorage.getFriends(2L),
+                "Вернулся список друзей второго пользователя null");
+        assertTrue(userStorage.getFriends(2L).isEmpty(),
+                "Список друзей второго пользователя пуст");
     }
 
     @Test
@@ -192,6 +200,7 @@ class FilmorateApplicationTests {
         userStorage.addUser(user2);
         userStorage.addFriend(1L, 2L);
 
-        assertTrue(userStorage.removeFriend(1L, 2L).get().isEmpty());
+        assertTrue(userStorage.removeFriend(1L, 2L).isEmpty(),
+                "Не удалился друг");
     }
 }

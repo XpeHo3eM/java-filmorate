@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.util.Mapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class GenreDao implements GenreStorage {
@@ -19,23 +18,23 @@ public class GenreDao implements GenreStorage {
     }
 
     @Override
-    public Optional<List<Genre>> getGenres() {
+    public List<Genre> getGenres() {
         String sqlQuery = "SELECT *\n" +
                 "FROM genres;";
 
-        return Optional.of(jdbcTemplate.query(sqlQuery, Mapper::mapRowToGenre));
+        return jdbcTemplate.query(sqlQuery, Mapper::mapRowToGenre);
     }
 
     @Override
-    public Optional<Genre> getGenre(Integer id) {
+    public Genre getGenre(Integer id) {
         String sqlQuery = "SELECT *\n" +
                 "FROM genres\n" +
                 "WHERE id = ?;";
 
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToGenre, id));
+            return jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToGenre, id);
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
     }
 }

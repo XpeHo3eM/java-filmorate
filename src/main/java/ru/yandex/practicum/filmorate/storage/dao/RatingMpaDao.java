@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.storage.RatingMpaStorage;
 import ru.yandex.practicum.filmorate.util.Mapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class RatingMpaDao implements RatingMpaStorage {
@@ -19,23 +18,23 @@ public class RatingMpaDao implements RatingMpaStorage {
     }
 
     @Override
-    public Optional<List<Mpa>> getRatingMPAs() {
+    public List<Mpa> getRatingMPAs() {
         String sqlQuery = "SELECT *\n" +
                 "FROM ratingsMPA;";
 
-        return Optional.of(jdbcTemplate.query(sqlQuery, Mapper::mapRowToRatingMPA));
+        return jdbcTemplate.query(sqlQuery, Mapper::mapRowToRatingMPA);
     }
 
     @Override
-    public Optional<Mpa> getRatingMPA(Integer id) {
+    public Mpa getRatingMPA(Integer id) {
         String sqlQuery = "SELECT *\n" +
                 "FROM ratingsMPA\n" +
                 "WHERE id = ?;";
 
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToRatingMPA, id));
+            return jdbcTemplate.queryForObject(sqlQuery, Mapper::mapRowToRatingMPA, id);
         } catch (DataAccessException e) {
-            return Optional.empty();
+            return null;
         }
     }
 }

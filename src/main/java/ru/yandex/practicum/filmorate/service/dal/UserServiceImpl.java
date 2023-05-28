@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.user.UserEntityAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.user.UserEntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -23,23 +23,33 @@ public class UserServiceImpl implements UserService {
     public User addUser(User user) {
         UserValidator.validate(user);
 
-        return storage.addUser(correctUser(user)).orElseThrow(() ->
-                new ObjectAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId())));
+        User userOnDb = storage.addUser(correctUser(user));
+
+        if (userOnDb == null) {
+            throw new UserEntityAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId()));
+        }
+
+        return userOnDb;
     }
 
     @Override
     public User updateUser(User user) {
         UserValidator.validate(user);
 
-        return storage.updateUser(correctUser(user)).orElseThrow(() ->
-                new ObjectNotFoundException(String.format("Пользователь с ID = %s не найден", user.getId())));
+        User userOnDb = storage.updateUser(correctUser(user));
+
+        if (userOnDb == null) {
+            throw new UserEntityNotFoundException(String.format("Пользователь с ID = %s не найден", user.getId()));
+        }
+
+        return userOnDb;
     }
 
     @Override
     public List<User> getFriends(Long id) {
         getUserOrThrowException(id);
 
-        return storage.getFriends(id).orElse(new ArrayList<>());
+        return storage.getFriends(id);
     }
 
     @Override
@@ -47,7 +57,7 @@ public class UserServiceImpl implements UserService {
         getUserOrThrowException(fromId);
         getUserOrThrowException(toId);
 
-        return storage.addFriend(fromId, toId).orElse(new ArrayList<>());
+        return storage.addFriend(fromId, toId);
     }
 
     @Override
@@ -55,7 +65,7 @@ public class UserServiceImpl implements UserService {
         getUserOrThrowException(fromId);
         getUserOrThrowException(toId);
 
-        return storage.removeFriend(fromId, toId).orElse(new ArrayList<>());
+        return storage.removeFriend(fromId, toId);
     }
 
     @Override
@@ -63,8 +73,8 @@ public class UserServiceImpl implements UserService {
         getUserOrThrowException(fromId);
         getUserOrThrowException(toId);
 
-        List<User> from = storage.getFriends(fromId).orElse(new ArrayList<>());
-        List<User> to = storage.getFriends(toId).orElse(new ArrayList<>());
+        List<User> from = storage.getFriends(fromId);
+        List<User> to = storage.getFriends(toId);
 
         if (from.isEmpty() || to.isEmpty()) {
             return new ArrayList<>();
@@ -84,12 +94,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return storage.getAllUsers().orElse(new ArrayList<>());
+        return storage.getAllUsers();
     }
 
     private User getUserOrThrowException(Long id) {
-        return storage.getUserById(id).orElseThrow(() ->
-                new ObjectNotFoundException(String.format("Пользователь с ID = %s не найден", id)));
+        User userOnDb = storage.getUserById(id);
+
+        if (userOnDb == null) {
+            throw new UserEntityNotFoundException(String.format("Пользователь с ID = %s не найден", id));
+        }
+
+        return userOnDb;
     }
 
     private User correctUser(User user) {

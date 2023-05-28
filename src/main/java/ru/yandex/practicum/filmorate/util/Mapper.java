@@ -4,6 +4,8 @@ import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Mapper {
     public static final User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
@@ -36,5 +38,26 @@ public class Mapper {
 
     public static final Mpa mapRowToRatingMPA(ResultSet rs, int rowNum) throws SQLException {
         return Mpa.valueOf(rs.getString("rating"));
+    }
+
+    public static final Map<String, Object> userToMap(User user) {
+        return new HashMap<>() {{
+            put("id", user.getId());
+            put("email", user.getEmail());
+            put("login", user.getLogin());
+            put("name", user.getName());
+            put("birthday", user.getBirthday());
+        }};
+    }
+
+    public static final Map<String, Object> filmToMap(Film film) {
+        return new HashMap<>() {{
+            put("id", film.getId());
+            put("name", film.getName());
+            put("description", film.getDescription());
+            put("release_date", film.getReleaseDate());
+            put("duration", film.getDuration());
+            put("rating_id", film.getMpa().getId());
+        }};
     }
 }

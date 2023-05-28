@@ -6,8 +6,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 @Builder
@@ -25,14 +23,4 @@ public class User {
 
     @PastOrPresent(message = "birthday can't be after today")
     private LocalDate birthday;
-
-    public Map<String, Object> toMap() {
-        return new HashMap<>() {{
-            put("id", id);
-            put("email", email);
-            put("login", login);
-            put("name", name);
-            put("birthday", birthday);
-        }};
-    }
 }

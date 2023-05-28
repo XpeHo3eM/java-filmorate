@@ -51,7 +51,7 @@ public class UserDao implements UserStorage {
         Long userId = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id")
-                .executeAndReturnKey(user.toMap()).longValue();
+                .executeAndReturnKey(Mapper.userToMap(user)).longValue();
 
         return getUserById(userId);
     }

@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.RatingMpaService;
 import ru.yandex.practicum.filmorate.storage.RatingMpaStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

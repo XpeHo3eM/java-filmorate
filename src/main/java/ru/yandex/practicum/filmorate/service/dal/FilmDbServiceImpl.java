@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -122,7 +121,7 @@ public class FilmDbServiceImpl implements FilmService {
         if (filmOnDb == null) {
             throw new FilmEntityNotFoundException(String.format("Фильм с ID = %s не найден", id));
         }
-        
+
         return filmOnDb;
     }
 }

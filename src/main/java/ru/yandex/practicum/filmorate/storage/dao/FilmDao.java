@@ -89,7 +89,7 @@ public class FilmDao implements FilmStorage {
         Long filmId = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("id")
-                .executeAndReturnKey(film.toMap())
+                .executeAndReturnKey(Mapper.filmToMap(film))
                 .longValue();
 
         film.setId(filmId);

@@ -7,9 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Setter
@@ -17,7 +15,6 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 public class Film {
-
     @EqualsAndHashCode.Exclude
     private long id;
 
@@ -47,16 +44,5 @@ public class Film {
         this.mpa = mpa;
         usersLikes = new LinkedHashSet<>();
         genres = new LinkedHashSet<>();
-    }
-
-    public Map<String, Object> toMap() {
-        return new HashMap<>() {{
-            put("id", id);
-            put("name", name);
-            put("description", description);
-            put("release_date", releaseDate);
-            put("duration", duration);
-            put("rating_id", mpa.getId());
-        }};
     }
 }

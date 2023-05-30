@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.time.Month;
 
 public class FilmValidator {
-    private static final int       MAX_DESCRIPTION_LENGTH = 200;
-    private static final LocalDate MIN_RELEASE_DATE_TIME  = LocalDate.of(1895, Month.DECEMBER, 28);
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
+    private static final LocalDate MIN_RELEASE_DATE_TIME = LocalDate.of(1895, Month.DECEMBER, 28);
 
     public static void validate(Film film) throws ValidationException {
         if (film.getName().isBlank()) {

@@ -35,7 +35,7 @@ public class FilmDao implements FilmStorage {
                 "\tf.duration,\n" +
                 "\tr.rating\n" +
                 "FROM films AS f\n" +
-                "JOIN ratingsMPA AS r ON f.rating_id = r.id\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
                 "WHERE f.id = ?;";
 
         Film film;
@@ -46,8 +46,8 @@ public class FilmDao implements FilmStorage {
             return null;
         }
 
-        film.setGenres(getGenres(id));
-        film.setUsersLikes(getLikes(id));
+        film.setGenres(getFilmGenres(id));
+        film.setUsersLikes(getFilmLikes(id));
 
         return film;
     }
@@ -62,20 +62,20 @@ public class FilmDao implements FilmStorage {
                 "\tf.duration,\n" +
                 "\tr.rating\n" +
                 "FROM films AS f\n" +
-                "JOIN ratingsMPA AS r ON f.rating_id = r.id\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
                 "ORDER BY f.id;";
 
         List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm);
         Map<Long, Film> filmsMap = films.stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));
 
-        List<Map<String, Object>> genres = getGenres();
+        Map<String, Genre> genresEntity = GenreDao.getGenreNameToGenreMap();
 
-        getGenres().forEach(row -> {
+        getFilmGenres().forEach(row -> {
             filmsMap.get(Long.parseLong(row.get("film_id").toString())).getGenres()
-                    .add(Genre.valueOf(row.get("genre").toString()));
+                    .add(genresEntity.get(row.get("genre").toString()));
         });
-        getLikes().forEach(row -> {
+        getFilmLikes().forEach(row -> {
             filmsMap.get(Long.parseLong(row.get("film_id").toString())).getUsersLikes()
                     .add(Long.parseLong(row.get("user_id").toString()));
         });
@@ -86,7 +86,7 @@ public class FilmDao implements FilmStorage {
     @Override
     @Transactional
     public Film addFilm(Film film) {
-        Long filmId = new SimpleJdbcInsert(jdbcTemplate)
+        long filmId = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("id")
                 .executeAndReturnKey(Mapper.filmToMap(film))
@@ -225,19 +225,19 @@ public class FilmDao implements FilmStorage {
         });
     }
 
-    private List<Map<String, Object>> getGenres() {
+    private List<Map<String, Object>> getFilmGenres() {
         String sqlQuery = "SELECT fg.film_id,\n" +
                 "\tg.genre\n" +
                 "FROM film_genres AS fg\n" +
                 "JOIN genres AS g ON fg.genre_id = g.id\n" +
                 "ORDER BY g.id;";
 
-        List<Map<String, Object>> res = new ArrayList<>(jdbcTemplate.queryForList(sqlQuery));
-        return res;
+        return new ArrayList<>(jdbcTemplate.queryForList(sqlQuery));
     }
 
-    private Set<Genre> getGenres(long filmId) {
-        String sqlQuery = "SELECT g.genre\n" +
+    private Set<Genre> getFilmGenres(long filmId) {
+        String sqlQuery = "SELECT g.id,\n" +
+                "\tg.genre\n" +
                 "FROM film_genres AS fg\n" +
                 "JOIN genres AS g ON fg.genre_id = g.id\n" +
                 "WHERE film_id = ?\n" +
@@ -246,7 +246,7 @@ public class FilmDao implements FilmStorage {
         return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, Mapper::mapRowToGenre, filmId));
     }
 
-    private List<Map<String, Object>> getLikes() {
+    private List<Map<String, Object>> getFilmLikes() {
         String sqlQuery = "SELECT user_id,\n" +
                 "\tfilm_id\n" +
                 "FROM film_users_likes\n" +
@@ -255,7 +255,7 @@ public class FilmDao implements FilmStorage {
         return new ArrayList<>(jdbcTemplate.queryForList(sqlQuery));
     }
 
-    private Set<Long> getLikes(long filmId) {
+    private Set<Long> getFilmLikes(long filmId) {
         String sqlQuery = "SELECT user_id\n" +
                 "FROM film_users_likes\n" +
                 "WHERE film_id = ?\n" +

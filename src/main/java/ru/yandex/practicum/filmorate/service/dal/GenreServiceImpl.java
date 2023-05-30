@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.genre.GenreEntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
@@ -26,7 +26,7 @@ public class GenreServiceImpl implements GenreService {
         Genre genreOnDb = genreStorage.getGenre(id);
 
         if (genreOnDb == null) {
-            throw new GenreEntityNotFoundException(String.format("Жанр с ID = %s не найден", id));
+            throw new EntityNotFoundException(String.format("Жанр с ID = %s не найден", id));
         }
 
         return genreOnDb;

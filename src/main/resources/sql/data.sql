@@ -1,17 +1,17 @@
 DELETE FROM genres;
-DELETE FROM ratingsMPA;
+DELETE FROM mpas;
 
 INSERT INTO genres(genre)
-VALUES ('COMEDY'),
-       ('DRAMA'),
-       ('CARTOON'),
-       ('THRILLER'),
-       ('DOCUMENTARY'),
-       ('ACTION_MOVIE');
+VALUES ('Комедия'),
+       ('Драма'),
+       ('Мультфильм'),
+       ('Триллер'),
+       ('Документальный'),
+       ('Боевик');
 
-INSERT INTO ratingsMPA(rating)
+INSERT INTO mpas(rating)
 VALUES ('G'),
        ('PG'),
-       ('PG13'),
+       ('PG-13'),
        ('R'),
-       ('NC17');
+       ('NC-17');

@@ -7,22 +7,34 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.util.Mapper;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class GenreDao implements GenreStorage {
-    private final JdbcTemplate jdbcTemplate;
+    private static JdbcTemplate jdbcTemplate;
 
     public GenreDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        GenreDao.jdbcTemplate = jdbcTemplate;
+    }
+
+    public static Map<String, Genre> getGenreNameToGenreMap() {
+        String sqlQuery = "SELECT *\n" +
+                "FROM genres;";
+
+        List<Genre> genres = jdbcTemplate.query(sqlQuery, Mapper::mapRowToGenre);
+
+        Map<String, Genre> genresMap = new LinkedHashMap<>();
+        genres.forEach(genre -> genresMap.put(genre.getName(), genre));
+
+        return genresMap;
     }
 
     @Override
     public List<Genre> getGenres() {
-        String sqlQuery = "SELECT *\n" +
-                "FROM genres;";
-
-        return jdbcTemplate.query(sqlQuery, Mapper::mapRowToGenre);
+        return new ArrayList<>(getGenreNameToGenreMap().values());
     }
 
     @Override

@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.entity.EntityAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.film.FilmAlreadyLikedException;
-import ru.yandex.practicum.filmorate.exception.film.FilmEntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.exception.film.FilmEntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.film.FilmNotLikedException;
-import ru.yandex.practicum.filmorate.exception.user.UserEntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -18,11 +17,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class FilmDbServiceImpl implements FilmService {
+public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public FilmDbServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -87,7 +86,7 @@ public class FilmDbServiceImpl implements FilmService {
         Film filmOnDb = filmStorage.addFilm(film);
 
         if (filmOnDb == null) {
-            throw new FilmEntityAlreadyExistsException(String.format("Фильм с ID = %s уже добавлен", film.getId()));
+            throw new EntityAlreadyExistsException(String.format("Фильм с ID = %s уже добавлен", film.getId()));
         }
 
         return filmOnDb;
@@ -100,7 +99,7 @@ public class FilmDbServiceImpl implements FilmService {
         Film filmOnDb = filmStorage.updateFilm(film);
 
         if (filmOnDb == null) {
-            throw new FilmEntityNotFoundException(String.format("Фильм с ID = %s не найден", film.getId()));
+            throw new EntityNotFoundException(String.format("Фильм с ID = %s не найден", film.getId()));
         }
 
         return filmOnDb;
@@ -110,7 +109,7 @@ public class FilmDbServiceImpl implements FilmService {
         User userOnDb = userStorage.getUserById(id);
 
         if (userOnDb == null) {
-            throw new UserEntityNotFoundException(String.format("Пользователь с ID = %s не найден", id));
+            throw new EntityNotFoundException(String.format("Пользователь с ID = %s не найден", id));
         }
         return userOnDb;
     }
@@ -119,7 +118,7 @@ public class FilmDbServiceImpl implements FilmService {
         Film filmOnDb = filmStorage.getFilmById(id);
 
         if (filmOnDb == null) {
-            throw new FilmEntityNotFoundException(String.format("Фильм с ID = %s не найден", id));
+            throw new EntityNotFoundException(String.format("Фильм с ID = %s не найден", id));
         }
 
         return filmOnDb;

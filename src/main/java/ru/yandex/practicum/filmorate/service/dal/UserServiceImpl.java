@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.user.UserEntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.exception.user.UserEntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.entity.EntityAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
         User userOnDb = storage.addUser(correctUser(user));
 
         if (userOnDb == null) {
-            throw new UserEntityAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId()));
+            throw new EntityAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId()));
         }
 
         return userOnDb;
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
         User userOnDb = storage.updateUser(correctUser(user));
 
         if (userOnDb == null) {
-            throw new UserEntityNotFoundException(String.format("Пользователь с ID = %s не найден", user.getId()));
+            throw new EntityNotFoundException(String.format("Пользователь с ID = %s не найден", user.getId()));
         }
 
         return userOnDb;
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
         User userOnDb = storage.getUserById(id);
 
         if (userOnDb == null) {
-            throw new UserEntityNotFoundException(String.format("Пользователь с ID = %s не найден", id));
+            throw new EntityNotFoundException(String.format("Пользователь с ID = %s не найден", id));
         }
 
         return userOnDb;

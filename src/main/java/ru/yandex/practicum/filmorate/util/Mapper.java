@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.util;
 
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,7 +26,7 @@ public class Mapper {
                 rs.getString("description"),
                 rs.getDate("release_date").toLocalDate(),
                 rs.getInt("duration"),
-                Mpa.valueOf(rs.getString("rating")));
+                MpaDao.getMpaNameToMpaMap().get(rs.getString("rating")));
     }
 
     public static final Long mapRowToLikes(ResultSet rs, int rowNum) throws SQLException {
@@ -33,11 +34,11 @@ public class Mapper {
     }
 
     public static final Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
-        return Genre.valueOf(rs.getString("genre"));
+        return new Genre(rs.getInt("id"), rs.getString("genre"));
     }
 
-    public static final Mpa mapRowToRatingMPA(ResultSet rs, int rowNum) throws SQLException {
-        return Mpa.valueOf(rs.getString("rating"));
+    public static final Mpa mapRowToMpa(ResultSet rs, int rowNum) throws SQLException {
+        return new Mpa(rs.getInt("id"), rs.getString("rating"));
     }
 
     public static final Map<String, Object> userToMap(User user) {

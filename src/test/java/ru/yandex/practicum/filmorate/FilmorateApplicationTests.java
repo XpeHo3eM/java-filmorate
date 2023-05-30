@@ -13,11 +13,14 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.RatingMpaStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
     private final GenreStorage genreStorage;
-    private final RatingMpaStorage ratingMpaStorage;
+    private final MpaStorage mpaStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
@@ -43,13 +46,13 @@ class FilmorateApplicationTests {
                 "description1",
                 LocalDate.now(),
                 99,
-                Mpa.NC17);
+                new Mpa(1, ""));
         film2 = new Film(1,
                 "film2",
                 "description2",
                 LocalDate.of(1990, 03, 13),
                 213,
-                Mpa.G);
+                new Mpa(3, ""));
         user1 = User.builder()
                 .login("login1")
                 .email("email1")
@@ -71,27 +74,31 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldGetCorrectGenre() {
-        assertEquals(Genre.COMEDY, genreStorage.getGenre(Genre.COMEDY.getId()),
+        Map<String, Genre> genres = GenreDao.getGenreNameToGenreMap();
+
+        assertEquals(genres.get("Комедия"), genreStorage.getGenre(genres.get("Комедия").getId()),
                 "Некорректно извлекается жанр фильма");
-        assertEquals(Genre.CARTOON, genreStorage.getGenre(Genre.CARTOON.getId()),
+        assertEquals(genres.get("Мультфильм"), genreStorage.getGenre(genres.get("Мультфильм").getId()),
                 "Некорректно извлекается жанр фильма");
-        assertEquals(Genre.ACTION_MOVIE, genreStorage.getGenre(Genre.ACTION_MOVIE.getId()),
+        assertEquals(genres.get("Боевик"), genreStorage.getGenre(genres.get("Боевик").getId()),
                 "Некорректно извлекается жанр фильма");
     }
 
     @Test
     void shouldReturn5RatingMPAs() {
-        assertEquals(5, ratingMpaStorage.getRatingMPAs().size(),
+        assertEquals(5, mpaStorage.getMpas().size(),
                 "Некорректное количество вариаций рейтинга");
     }
 
     @Test
     void shouldGetCorrectRagingMPA() {
-        assertEquals(Mpa.G, ratingMpaStorage.getRatingMPA(Mpa.G.getId()),
+        Map<String, Mpa> mpas = MpaDao.getMpaNameToMpaMap();
+
+        assertEquals(mpas.get("G"), mpaStorage.getMpa(mpas.get("G").getId()),
                 "Некорректно извлекается рейтинг фильма");
-        assertEquals(Mpa.PG13, ratingMpaStorage.getRatingMPA(Mpa.PG13.getId()),
+        assertEquals(mpas.get("PG-13"), mpaStorage.getMpa(mpas.get("PG-13").getId()),
                 "Некорректно извлекается рейтинг фильма");
-        assertEquals(Mpa.NC17, ratingMpaStorage.getRatingMPA(Mpa.NC17.getId()),
+        assertEquals(mpas.get("NC-17"), mpaStorage.getMpa(mpas.get("NC-17").getId()),
                 "Некорректно извлекается рейтинг фильма");
     }
 

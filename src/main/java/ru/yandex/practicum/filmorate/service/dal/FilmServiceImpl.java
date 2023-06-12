@@ -34,32 +34,26 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film addLike(Long filmId, Long userId) {
-        User user = getUserOrThrowException(userId);
         Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 
-        if (likes.contains(userId)) {
-            throw new FilmAlreadyLikedException(String.format("%s уже лайкал \"%s\"", user.getName(), film.getName()));
+        if (!likes.contains(userId)) {
+            likes.add(userId);
+            filmStorage.updateFilm(film);
         }
-
-        likes.add(userId);
-        filmStorage.updateFilm(film);
 
         return film;
     }
 
     @Override
     public Film removeLike(Long filmId, Long userId) {
-        User user = getUserOrThrowException(userId);
         Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 
-        if (!likes.contains(userId)) {
-            throw new FilmNotLikedException(String.format("%s еще не лайкал \"%s\"", user.getName(), film.getName()));
+        if (likes.contains(userId)) {
+            likes.remove(userId);
+            filmStorage.updateFilm(film);
         }
-
-        likes.remove(userId);
-        filmStorage.updateFilm(film);
 
         return film;
     }

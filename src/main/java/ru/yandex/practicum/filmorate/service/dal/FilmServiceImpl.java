@@ -32,6 +32,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film addLike(Long filmId, Long userId) {
+        User user = getUserOrThrowException(userId);
         Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 
@@ -45,6 +46,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film removeLike(Long filmId, Long userId) {
+        User user = getUserOrThrowException(userId);
         Film film = getFilmOrThrowException(filmId);
         Set<Long> likes = film.getUsersLikes();
 

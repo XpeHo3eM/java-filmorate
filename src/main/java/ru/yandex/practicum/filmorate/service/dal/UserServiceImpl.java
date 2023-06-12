@@ -8,7 +8,9 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,6 +97,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         return storage.getAllUsers();
+    }
+
+    @Override
+    public void removeUserById(long userId) {
+        if (storage.removeUser(userId) == 0) {
+            throw new EntityNotFoundException(String.format("Пользователь с ID = %s не найден", userId));
+        }
     }
 
     private User getUserOrThrowException(Long id) {

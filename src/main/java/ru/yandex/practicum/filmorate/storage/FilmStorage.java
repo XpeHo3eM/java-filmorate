@@ -9,7 +9,17 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
+    List<Film> getAllFilmsByDirector(long directorId);
+
     Film addFilm(Film film);
 
     Film updateFilm(Film film);
+
+    List<Film> searchFilm(String query, List<String> searchBy);
+
+    List<Film> getRecommendations(Long forUserId, Long fromUserId);
+
+    List<Film> commonAndPopularFilm(long userId, long friendId);
+
+    int removeFilm(long id);
 }

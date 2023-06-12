@@ -6,8 +6,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.util.Mapper;
 
@@ -20,9 +22,11 @@ import java.util.stream.Collectors;
 @Repository("filmDao")
 public class FilmDao implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final DirectorStorage directorStorage;
 
-    public FilmDao(JdbcTemplate jdbcTemplate) {
+    public FilmDao(JdbcTemplate jdbcTemplate, DirectorStorage directorStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -48,6 +52,7 @@ public class FilmDao implements FilmStorage {
 
         film.setGenres(getFilmGenres(id));
         film.setUsersLikes(getFilmLikes(id));
+        film.setDirectors(getFilmDirectors(id));
 
         return film;
     }
@@ -66,19 +71,30 @@ public class FilmDao implements FilmStorage {
                 "ORDER BY f.id;";
 
         List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm);
-        Map<Long, Film> filmsMap = films.stream()
-                .collect(Collectors.toMap(Film::getId, Function.identity()));
 
-        Map<String, Genre> genresEntity = GenreDao.getGenreNameToGenreMap();
+        fillFilmsInfo(films);
 
-        getFilmGenres().forEach(row -> {
-            filmsMap.get(Long.parseLong(row.get("film_id").toString())).getGenres()
-                    .add(genresEntity.get(row.get("genre").toString()));
-        });
-        getFilmLikes().forEach(row -> {
-            filmsMap.get(Long.parseLong(row.get("film_id").toString())).getUsersLikes()
-                    .add(Long.parseLong(row.get("user_id").toString()));
-        });
+        return films;
+    }
+
+    @Override
+    @Transactional
+    public List<Film> getAllFilmsByDirector(long directorId) {
+        String sqlQuery = "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "JOIN film_directors AS fd ON f.id = fd.film_id\n" +
+                "WHERE fd.director_id = ?\n" +
+                "ORDER BY f.id;";
+
+        List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, directorId);
+
+        fillFilmsInfo(films);
 
         return films;
     }
@@ -96,6 +112,7 @@ public class FilmDao implements FilmStorage {
 
         addFilmGenres(film);
         addFilmUsersLikes(film);
+        addFilmDirectors(film);
 
         return getFilmById(filmId);
     }
@@ -115,8 +132,179 @@ public class FilmDao implements FilmStorage {
 
         updateFilmGenres(film);
         updateFilmLikes(film);
+        updateFilmDirectors(film);
 
         return getFilmById(film.getId());
+    }
+
+
+    @Override
+    public List<Film> getRecommendations(Long forUserId, Long fromUserId) {
+        String sqlQuery = "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE f.id in (" +
+                "SELECT film_id "
+                + "FROM film_users_likes "
+                + "WHERE user_id = ? "
+                + "AND film_id not in ( "
+                + "    SELECT film_id "
+                + "    FROM film_users_likes "
+                + "    WHERE user_id = ? "
+                + ")) " +
+                "ORDER BY f.id;";
+
+        List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, fromUserId, forUserId);
+
+        fillFilmsInfo(films);
+
+        return films;
+    }
+
+    @Override
+    @Transactional
+    public List<Film> commonAndPopularFilm(long userId, long friendId) {
+        String sqlQuery = "SELECT *\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE f.id IN\n" +
+                "(SELECT film_id\n" +
+                "FROM film_users_likes AS ful\n" +
+                "WHERE user_id = ?\n" +
+                "GROUP BY film_id\n" +
+                "ORDER BY COUNT(user_id))\n" +
+                "INTERSECT\n" +
+                "SELECT *\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE f.id IN\n" +
+                "(SELECT film_id\n" +
+                "FROM film_users_likes\n" +
+                "WHERE user_id = ?)\n";
+
+        List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, userId, friendId);
+        fillFilmsInfo(films);
+
+        return films;
+    }
+
+    @Override
+    @Transactional
+    public int removeFilm(long filmId) {
+        String sqlQuery = "DELETE\n" +
+                "FROM films\n" +
+                "WHERE id = ?;";
+        return jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    private void fillFilmsInfo(List<Film> films) {
+        Map<Long, Film> filmsMap = films.stream()
+                .collect(Collectors.toMap(Film::getId, Function.identity()));
+
+        Map<String, Genre> genresEntity = GenreDao.getGenreNameToGenreMap();
+
+        getFilmGenres().forEach(row -> {
+            Film film = filmsMap.get(Long.parseLong(row.get("film_id").toString()));
+
+            if (film != null) {
+                film.getGenres().add(genresEntity.get(row.get("genre").toString()));
+            }
+        });
+        getFilmLikes().forEach(row -> {
+            Film film = filmsMap.get(Long.parseLong(row.get("film_id").toString()));
+
+            if (film != null) {
+                film.getUsersLikes().add(Long.parseLong(row.get("user_id").toString()));
+            }
+        });
+        getFilmDirectors().forEach(row -> {
+            Film film = filmsMap.get(Long.parseLong(row.get("film_id").toString()));
+
+            if (film != null) {
+                film.getDirectors().add(directorStorage.getDirectorById(Long.parseLong(row.get("director_id").toString())));
+            }
+        });
+    }
+
+    @Override
+    @Transactional
+    public List<Film> searchFilm(String query, List<String> searchBy) {
+        Set<String> searchBySet = new HashSet<>(searchBy);
+        query = "%" + query + "%";
+
+        List<Film> films;
+        String sqlQuery = "";
+
+        boolean searchByDirector = searchBySet.contains("director");
+        boolean searchByTitle = searchBySet.contains("title");
+
+        if (searchByDirector && searchByTitle) {
+            sqlQuery = getSqlQuerySearchByDirectorAndTitle();
+        } else if (searchByDirector) {
+            sqlQuery = getSqlQuerySearchByDirector();
+        } else if (searchByTitle) {
+            sqlQuery = getSqlQuerySearchByTitle();
+        }
+
+        if (searchByDirector && searchByTitle) {
+            films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, query, query);
+        } else {
+            films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, query);
+        }
+
+        fillFilmsInfo(films);
+
+        return films;
+    }
+
+    private String getSqlQuerySearchByTitle() {
+        return "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE UPPER(f.name) LIKE UPPER(?)\n" +
+                "ORDER BY f.id;";
+    }
+
+    private String getSqlQuerySearchByDirector() {
+        return "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE f.id IN (SELECT fd.film_id\n" +
+                "\tFROM film_directors AS fd\n" +
+                "\tJOIN directors AS d ON d.id = fd.director_id\n" +
+                "\tWHERE UPPER(d.name) LIKE UPPER(?))\n" +
+                "ORDER BY f.id;";
+    }
+
+    private String getSqlQuerySearchByDirectorAndTitle() {
+        return "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM films AS f\n" +
+                "JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE f.id IN (SELECT fd.film_id\n" +
+                "\tFROM film_directors AS fd\n" +
+                "\tJOIN directors AS d ON d.id = fd.director_id\n" +
+                "\tWHERE UPPER(d.name) LIKE UPPER(?)) OR UPPER(f.name) LIKE UPPER(?)\n" +
+                "ORDER BY f.id;";
     }
 
     private void addFilmGenres(Film film) {
@@ -153,6 +341,26 @@ public class FilmDao implements FilmStorage {
             @Override
             public int getBatchSize() {
                 return likes.size();
+            }
+        });
+    }
+
+    private void addFilmDirectors(Film film) {
+        String sqlQuery = "INSERT INTO film_directors (film_id, director_id)\n" +
+                "VALUES(?, ?);";
+
+        List<Director> directors = new ArrayList<>(film.getDirectors());
+
+        jdbcTemplate.batchUpdate(sqlQuery, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, film.getId());
+                ps.setLong(2, directors.get(i).getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return directors.size();
             }
         });
     }
@@ -225,6 +433,15 @@ public class FilmDao implements FilmStorage {
         });
     }
 
+    private void updateFilmDirectors(Film film) {
+        String sqlQuery = "DELETE FROM film_directors\n" +
+                "WHERE film_id = ?;";
+
+        jdbcTemplate.update(sqlQuery, film.getId());
+
+        addFilmDirectors(film);
+    }
+
     private List<Map<String, Object>> getFilmGenres() {
         String sqlQuery = "SELECT fg.film_id,\n" +
                 "\tg.genre\n" +
@@ -262,5 +479,25 @@ public class FilmDao implements FilmStorage {
                 "ORDER BY user_id;";
 
         return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, Mapper::mapRowToLikes, filmId));
+    }
+
+    private List<Map<String, Object>> getFilmDirectors() {
+        String sqlQuery = "SELECT director_id,\n" +
+                "\tfilm_id\n" +
+                "FROM film_directors\n" +
+                "ORDER BY director_id, film_id;";
+
+        return new ArrayList<>(jdbcTemplate.queryForList(sqlQuery));
+    }
+
+    private Set<Director> getFilmDirectors(long filmId) {
+        String sqlQuery = "SELECT d.id,\n" +
+                "\td.name\n" +
+                "FROM film_directors AS fd\n" +
+                "JOIN directors AS d ON d.id = fd.director_id\n" +
+                "WHERE fd.film_id = ?\n" +
+                "ORDER BY d.id;";
+
+        return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, Mapper::mapRowToDirector, filmId));
     }
 }

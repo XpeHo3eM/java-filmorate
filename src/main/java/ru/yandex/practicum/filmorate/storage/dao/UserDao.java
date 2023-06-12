@@ -82,6 +82,15 @@ public class UserDao implements UserStorage {
 
     @Override
     @Transactional
+    public int removeUser(long userId) {
+        String sqlQuery = "DELETE\n" +
+                "FROM users\n" +
+                "WHERE id = ?;";
+        return jdbcTemplate.update(sqlQuery, userId);
+    }
+
+    @Override
+    @Transactional
     public List<User> getFriends(Long id) {
         String sqlQuery = "SELECT u.id AS id,\n" +
                 "\tu.name AS name,\n" +
@@ -116,5 +125,39 @@ public class UserDao implements UserStorage {
         jdbcTemplate.update(sqlQuery, fromId, toId, toId, fromId);
 
         return getFriends(fromId);
+    }
+
+    @Override
+    public Long getLikesCount(Long id) {
+        String sql = "SELECT count(*) \n"
+                + "FROM film_users_likes \n"
+                + "WHERE user_id = ?;";
+        Long likesCount = null;
+        try {
+            likesCount = jdbcTemplate.queryForObject(sql, Long.class, id);
+        } catch (DataAccessException ignore) {
+        }
+
+        return likesCount == null ? 0 : likesCount;
+    }
+
+    @Override
+    public Long getUserIdWithMostCommonLikes(Long id) {
+        String sql = "SELECT user_id \n"
+                + "FROM film_users_likes \n"
+                + "WHERE film_id IN ( \n"
+                + "    \tSELECT film_id \n"
+                + "    \tFROM film_users_likes\n "
+                + "    \tWHERE user_id = ? \n"
+                + ") \n"
+                + "AND user_id != ?\n "
+                + "GROUP BY user_id \n"
+                + "ORDER BY COUNT(*) DESC\n "
+                + "LIMIT 1;";
+        try {
+            return jdbcTemplate.queryForObject(sql, Long.class, id, id);
+        } catch (DataAccessException ignore) {
+            return null;
+        }
     }
 }

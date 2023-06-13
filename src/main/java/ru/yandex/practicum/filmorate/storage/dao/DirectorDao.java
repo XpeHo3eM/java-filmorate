@@ -52,7 +52,7 @@ public class DirectorDao implements DirectorStorage {
                 .executeAndReturnKey(Mapper.directorToMap(director)).longValue();
 
         director.setId(directorId);
-        
+
         return director;
     }
 

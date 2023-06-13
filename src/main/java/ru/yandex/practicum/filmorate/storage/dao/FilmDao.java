@@ -114,7 +114,7 @@ public class FilmDao implements FilmStorage {
         addFilmUsersLikes(film);
         addFilmDirectors(film);
 
-        return getFilmById(filmId);
+        return film;
     }
 
     @Override
@@ -134,32 +134,26 @@ public class FilmDao implements FilmStorage {
         updateFilmLikes(film);
         updateFilmDirectors(film);
 
-        return getFilmById(film.getId());
+        return film;
     }
 
 
     @Override
     public List<Film> getRecommendations(Long forUserId, Long fromUserId) {
         String sqlQuery = "SELECT f.id,\n" +
-                "\tf.name,\n" +
-                "\tf.description,\n" +
-                "\tf.release_date,\n" +
-                "\tf.duration,\n" +
-                "\tr.rating\n" +
+                "       \tf.name,\n" +
+                "       \tf.description,\n" +
+                "       \tf.release_date,\n" +
+                "       \tf.duration,\n" +
+                "       \tr.rating\n" +
                 "FROM films AS f\n" +
                 "JOIN mpas AS r ON f.rating_id = r.id\n" +
-                "WHERE f.id in (" +
-                "SELECT film_id "
-                + "FROM film_users_likes "
-                + "WHERE user_id = ? "
-                + "AND film_id not in ( "
-                + "    SELECT film_id "
-                + "    FROM film_users_likes "
-                + "    WHERE user_id = ? "
-                + ")) " +
-                "ORDER BY f.id;";
+                "LEFT JOIN film_users_likes AS u1 ON f.id = u1.film_id AND u1.user_id = ?\n" +
+                "LEFT JOIN film_users_likes AS u2 ON f.id = u2.film_id AND u2.user_id = ?\n" +
+                "WHERE u1.film_id IS NULL AND u2.film_id IS NOT NULL\n" +
+                "ORDER BY f.id;\n";
 
-        List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, fromUserId, forUserId);
+        List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, forUserId, fromUserId);
 
         fillFilmsInfo(films);
 
@@ -169,23 +163,19 @@ public class FilmDao implements FilmStorage {
     @Override
     @Transactional
     public List<Film> commonAndPopularFilm(long userId, long friendId) {
-        String sqlQuery = "SELECT *\n" +
-                "FROM films AS f\n" +
-                "JOIN mpas AS r ON f.rating_id = r.id\n" +
-                "WHERE f.id IN\n" +
-                "(SELECT film_id\n" +
-                "FROM film_users_likes AS ful\n" +
-                "WHERE user_id = ?\n" +
-                "GROUP BY film_id\n" +
-                "ORDER BY COUNT(user_id))\n" +
-                "INTERSECT\n" +
-                "SELECT *\n" +
-                "FROM films AS f\n" +
-                "JOIN mpas AS r ON f.rating_id = r.id\n" +
-                "WHERE f.id IN\n" +
-                "(SELECT film_id\n" +
-                "FROM film_users_likes\n" +
-                "WHERE user_id = ?)\n";
+        String sqlQuery = "SELECT f.id,\n" +
+                "\tf.name,\n" +
+                "\tf.description,\n" +
+                "\tf.release_date,\n" +
+                "\tf.duration,\n" +
+                "\tr.rating\n" +
+                "FROM film_users_likes AS fl\n" +
+                "LEFT JOIN films AS f ON fl.film_id = f.id\n" +
+                "LEFT JOIN mpas AS r ON f.rating_id = r.id\n" +
+                "WHERE fl.user_id IN (?,?)\n" +
+                "GROUP BY fl.film_id\n" +
+                "HAVING (COUNT(fl.film_id) > 1)\n" +
+                "ORDER BY f.id;";
 
         List<Film> films = jdbcTemplate.query(sqlQuery, Mapper::mapRowToFilm, userId, friendId);
         fillFilmsInfo(films);
@@ -199,6 +189,7 @@ public class FilmDao implements FilmStorage {
         String sqlQuery = "DELETE\n" +
                 "FROM films\n" +
                 "WHERE id = ?;";
+
         return jdbcTemplate.update(sqlQuery, filmId);
     }
 

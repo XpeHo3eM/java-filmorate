@@ -51,7 +51,9 @@ public class DirectorDao implements DirectorStorage {
                 .usingGeneratedKeyColumns("id")
                 .executeAndReturnKey(Mapper.directorToMap(director)).longValue();
 
-        return getDirectorById(directorId);
+        director.setId(directorId);
+        
+        return director;
     }
 
     @Override

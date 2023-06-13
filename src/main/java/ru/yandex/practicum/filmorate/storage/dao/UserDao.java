@@ -53,7 +53,9 @@ public class UserDao implements UserStorage {
                 .usingGeneratedKeyColumns("id")
                 .executeAndReturnKey(Mapper.userToMap(user)).longValue();
 
-        return getUserById(userId);
+        user.setId(userId);
+
+        return user;
     }
 
     @Override
@@ -86,6 +88,7 @@ public class UserDao implements UserStorage {
         String sqlQuery = "DELETE\n" +
                 "FROM users\n" +
                 "WHERE id = ?;";
+
         return jdbcTemplate.update(sqlQuery, userId);
     }
 
@@ -132,6 +135,7 @@ public class UserDao implements UserStorage {
         String sql = "SELECT count(*) \n"
                 + "FROM film_users_likes \n"
                 + "WHERE user_id = ?;";
+
         Long likesCount = null;
         try {
             likesCount = jdbcTemplate.queryForObject(sql, Long.class, id);

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -14,17 +13,16 @@ import java.util.List;
 public class FeedDao implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public FeedDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void createFeed(Long userId, Long entityId, String eventType, String operation) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+        new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("feeds")
-                .usingGeneratedKeyColumns("event_id");
-        simpleJdbcInsert.executeAndReturnKey(Mapper.feedToMap(userId, entityId, eventType, operation)).longValue();
+                .usingGeneratedKeyColumns("event_id")
+                .execute(Mapper.feedToMap(userId, entityId, eventType, operation));
     }
 
     @Override
@@ -32,6 +30,7 @@ public class FeedDao implements FeedStorage {
         String sqlQuery = "SELECT *\n" +
                 "FROM feeds\n" +
                 "WHERE user_id = ?";
+
         return jdbcTemplate.query(sqlQuery, Mapper::mapRowToFeed, userId);
     }
 }

@@ -56,7 +56,7 @@ public class DirectorController {
     public void removeDirector(@PathVariable long id,
                                HttpServletRequest request) {
         log.debug("On URL [{}] used method [{}]", request.getRequestURL(), request.getMethod());
-        
+
         service.removeDirector(id);
     }
 }

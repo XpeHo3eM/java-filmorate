@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.entity.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.entity.EntityNotDeletedException;
 import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -36,13 +35,7 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director addDirector(Director director) {
-        Director directorOnDb = storage.addDirector(director);
-
-        if (directorOnDb == null) {
-            throw new EntityAlreadyExistsException(String.format("Режиссер с ID = %s уже добавлен", director.getId()));
-        }
-
-        return directorOnDb;
+        return storage.addDirector(director);
     }
 
     @Override

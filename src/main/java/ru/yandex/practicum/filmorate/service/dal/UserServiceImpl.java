@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.entity.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -25,13 +24,7 @@ public class UserServiceImpl implements UserService {
     public User addUser(User user) {
         UserValidator.validate(user);
 
-        User userOnDb = storage.addUser(correctUser(user));
-
-        if (userOnDb == null) {
-            throw new EntityAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId()));
-        }
-
-        return userOnDb;
+        return storage.addUser(correctUser(user));
     }
 
     @Override

@@ -18,4 +18,10 @@ public interface UserStorage {
     List<User> addFriend(Long fromId, Long toId);
 
     List<User> removeFriend(Long fromId, Long toId);
+
+    Long getLikesCount(Long id);
+
+    Long getUserIdWithMostCommonLikes(Long id);
+
+    int removeUser(long userId);
 }

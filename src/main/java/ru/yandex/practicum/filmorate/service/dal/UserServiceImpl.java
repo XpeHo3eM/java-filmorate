@@ -1,14 +1,15 @@
 package ru.yandex.practicum.filmorate.service.dal;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.entity.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.entity.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,13 +24,7 @@ public class UserServiceImpl implements UserService {
     public User addUser(User user) {
         UserValidator.validate(user);
 
-        User userOnDb = storage.addUser(correctUser(user));
-
-        if (userOnDb == null) {
-            throw new EntityAlreadyExistsException(String.format("Пользователь с ID = %s уже добавлен", user.getId()));
-        }
-
-        return userOnDb;
+        return storage.addUser(correctUser(user));
     }
 
     @Override
@@ -95,6 +90,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         return storage.getAllUsers();
+    }
+
+    @Override
+    public void removeUserById(long userId) {
+        if (storage.removeUser(userId) == 0) {
+            throw new EntityNotFoundException(String.format("Пользователь с ID = %s не найден", userId));
+        }
     }
 
     private User getUserOrThrowException(Long id) {
